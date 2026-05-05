@@ -14,3 +14,67 @@ Source: Kaggle — Brazilian E-Commerce Public Dataset by Olist
 PostgreSQL — all analysis and schema design
 pgAdmin — query execution and ERD design
 GitHub — version control and portfolio
+
+🔍 Analysis Covered
+
+1. 👥 Customer Analysis
+
+Unique customers by state and city
+Repeat vs one-time buyer segmentation (CASE WHEN)
+Customers active across all 3 years (INTERSECT)
+Delivered customers who never reviewed (EXCEPT)
+New customer acquisition by month (CTE + MIN)
+Top customers per state by spend (ROW_NUMBER + PARTITION BY)
+
+
+2. 🏪 Seller Analysis
+
+Top 5 sellers by revenue
+Average order value per seller
+Seller vs city performance (ROW_NUMBER + PARTITION BY)
+Top customer per seller (RANK + PARTITION BY)
+Sellers with most delayed deliveries
+
+3. 💰 Revenue & Payments
+
+Monthly revenue trend with MoM growth (LAG + CTE)
+Top 5 revenue-generating product categories
+Revenue by payment type
+Credit card dominates — both in count and revenue
+
+4. ⭐ Review Analysis
+
+Rating distribution — 5-star most frequent
+Higher ratings = Higher revenue (confirmed)
+
+5. 🔁 Funnel Analysis
+
+% orders delivered vs % orders reviewed
+Drop-off identification using FILTER clause
+
+
+6. 🎯 Customer Segmentation
+
+Top 10% customers by spend (NTILE)
+Bottom 10% customers by spend
+High-value vs low-value customer identification
+
+
+🔍 Key Insights
+Business scaled rapidly from 329 orders (2016) to 54,011 (2018)
+Customer acquisition peaked around mid-2017
+
+Some deliveries occurred much earlier than estimated, indicating conservative timelines
+Extreme delays (up to 188 days) highlight operational issues
+São Paulo (SP) and certain cities show high delayed deliveries
+Indicates region-specific logistics inefficiencies
+
+Customer retention is extremely low
+Majority are one-time buyers
+646 customers did not leave reviews after delivery
+Indicates drop in post-purchase engagement
+
+Higher ratings are associated with higher revenue
+Product quality directly impacts business performance
+Credit card is the dominant payment method
+
