@@ -78,3 +78,21 @@ Higher ratings are associated with higher revenue
 Product quality directly impacts business performance
 Credit card is the dominant payment method
 
+💡 Business Recommendations:
+
+Improve logistics in high-delay regions
+Focus on customer retention (loyalty programs, re-engagement)
+Enhance product quality in low-rated categories
+Encourage customer reviews through incentives
+Target high-value customers with personalized strategies
+
+🧠 SQL Concepts Used
+JOINs · CTEs · Window Functions · RANK · ROW_NUMBER · NTILE · LAG · PARTITION BY · CASE WHEN · FILTER · INTERSECT · EXCEPT · EXTRACT · Subqueries · HAVING · unaccent extension
+
+📌 Conclusion
+
+This project demonstrates the use of SQL for end-to-end business analysis, including data exploration, segmentation, and insight generation.
+The findings highlight key areas for improvement in customer retention, delivery operations, and product quality.
+
+👤 Author
+Chitransh Jain
