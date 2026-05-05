@@ -5,16 +5,7 @@ The goal was to think like a Data Analyst — not just query data, but extract m
 
 🗂️ Dataset
 Source: Kaggle — Brazilian E-Commerce Public Dataset by Olist
-Table                              Description
-olist_orders                       Core orders table — status,timestamps
-customers_dataset                  Customer location and unique IDs
-order_items_dataset                Products, sellers, prices per order
-order_payments_dataset             Payment type and value
-order_reviews                      Customer ratings and comments
-products_dataset                   Product category and dimensions
-sellers_dataset                    Seller location data
-product_category_name_english      Category name translations
-geolocation_dataset                Lat/lng by zip code
+
 
 
 
