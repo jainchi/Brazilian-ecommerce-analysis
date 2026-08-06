@@ -274,6 +274,9 @@ ORDER BY 2 DESC
 
 
 
+
+	
+
 -- Q. Check total count by sellers
 SELECT s.seller_id , COUNT(DISTINCT o1.order_id)as orderscount FROM olist_orders o1
 LEFT JOIN order_items_dataset o2
@@ -285,6 +288,11 @@ order BY 2 DESC
 -- Outcome.“This query correctly includes all sellers and counts how many distinct orders each seller fulfilled, including those with zero orders.”
 
 
+
+
+
+
+	
 -- Q. Calculate count of orders by order_item_id of each seller
 select distinct seller_id from order_items_dataset
 
@@ -292,6 +300,9 @@ SELECT seller_id, order_item_id, COUNT(*) AS countbyitemid
 FROM order_items_dataset
 GROUP BY seller_id, order_item_id
 ORDER BY countbyitemid DESC;
+
+
+
 
 
 
@@ -306,6 +317,9 @@ GROUP BY o2.seller_id,order_item_id
 order BY 3 DESC
 
 
+
+
+	
 
 -- Ques  1. Top 5 sellers by revenue
 -- Ques  2. Average order value per seller
@@ -322,6 +336,9 @@ ORDER BY totalrevenue DESC
 LIMIT 5 
 -- I have'nt multiplied price with quantity because there is no quantity column.
 
+
+
+	
 SELECT * FROM order_payments_dataset
 WHERE order_id='b81ef226f3fe1789b1e8b2acac839d17'
 
@@ -330,6 +347,9 @@ WHERE order_id='b81ef226f3fe1789b1e8b2acac839d17'
 -- Checked what actually payment_value contains in order_payments_dataset(price+freight)
 
 
+
+
+	
 
 WITH totals  AS(
 SELECT seller_id,customer_unique_id,sum(price) as totalpurchase
@@ -350,7 +370,12 @@ WHERE rankbyrowno <2
 -- OUTCOME Have founded top customer for each seller
 
 
+	
 
+
+
+
+	
 WITH total as(
 SELECT customer_state,customer_unique_id,sum(price) as totalpurchase FROM olist_orders o
 JOIN customers_dataset c
@@ -373,7 +398,9 @@ which were intentionally excluded from this analysis.”
 */
 
 
--- Ques  2. Average order value per seller
+
+	
+------=====>>>> Average order value per seller   >>>>>>
 
 SELECT seller_id,
     ROUND(SUM(price)::NUMERIC, 2) AS total_revenue,
@@ -384,7 +411,9 @@ GROUP BY 1
 ORDER BY 4 DESC
 
 
--- Ques 3. Seller vs city performance
+	
+
+-------->>> Seller vs city performance
 SELECT * FROM(
 SELECT s.seller_id,customer_city, SUM(price) as totalrevenue,
 ROW_NUMBER() OVER(PARTITION BY s.seller_id ORDER BY SUM(price) DESC) AS rank
@@ -399,8 +428,10 @@ GROUP BY 1,2
 ) AS ranked_data
 WHERE rank<4
 
--- 
 
+
+
+	
 
 -- 1. Monthly Revenue Trend
 -- 2. Late Delivery Rate  
@@ -445,6 +476,10 @@ LIMIT 5
 -- Above Query is showing top 5 categories by revenue.
 
 
+
+
+	
+
 SELECT customer_type, count(*) from(
 SELECT ct.customer_unique_id,count(os.order_id),
 CASE WHEN COUNT(os.order_id) > 1 THEN 'Repeat Customer'ELSE 'One-time Customer' END AS customer_type
@@ -458,6 +493,8 @@ GROUP by 1
 
 
 
+
+	
 SELECT DISTINCT product_category_name,MAX(price) OVER (PARTITION BY product_category_name) as costliestprice
 from products_dataset pt
 JOIN order_items_dataset oid
@@ -467,6 +504,9 @@ ORDER BY 2 DESC
 -- maximum price among products of a particular category
 
 
+
+	
+
 SELECT cdt.customer_unique_id,SUM(price) as totalpurchase, COUNT(DISTINCT ols.order_id) AS purchasecount, MAX(order_placed_time) 
 FROM customers_dataset cdt
 JOIN olist_orders ols
@@ -475,9 +515,12 @@ JOIN order_items_dataset oid
 ON ols.order_id=oid.order_id
 GROUP BY 1 
 ORDER BY 2 DESC
-
 -- Founded total purchase, count of transactions, last purchase date
 
+
+
+
+	
 SELECT customer_state,COUNT(DISTINCT oor.order_id)
 FROM olist_orders oor
 join customers_dataset cs
@@ -487,6 +530,8 @@ GROUP BY 1
 order by 2 DESC
 --State “SP” has the highest number of delayed orders.
 
+
+	
 
 
 SELECT seller_id,COUNT(DISTINCT oor.order_id) as delayeddeliveries
@@ -501,6 +546,9 @@ order by 2 DESC
 -- 4a3ca9315b744ce9f8e9374361493884 has maximum delayed deliveries
 
 
+
+
+	
 WITH first_purchase AS (
     SELECT 
         ct.customer_unique_id,
@@ -518,6 +566,8 @@ FROM first_purchase
 GROUP BY year, month
 ORDER BY year, month;
 -- Group customers by:First purchase month
+
+
 
 
 
@@ -542,6 +592,9 @@ ORDER BY 2 DESC
 -- Yes, Higher rating has generated higher revenue
 
 
+
+	
+
 SELECT 
     product_category_name,
     COUNT(DISTINCT odd.order_id) AS total_orders,
@@ -560,8 +613,8 @@ JOIN products_dataset pd
 ON pd.product_id = oid.product_id
 GROUP BY product_category_name
 ORDER BY bad_review_rate DESC;
-
 -- Shows which categories have the highest bad review percentage, not just count.
+
 
 /*
 🔁 Funnel Thinking ()
@@ -572,6 +625,7 @@ Drop-offs
 👉 Insight:
 Where business is losing engagement
 */
+
 
 WITH categorisation AS(
 SELECT count(oos.*) as totalorders,
@@ -586,6 +640,9 @@ SELECT 100*(deliverorders::numeric/totalorders) AS  ordersdeliverepercentage,
 FROM categorisation
 
 
+
+	
+
 /*
 Customer Segmentation 
 Find:
@@ -593,7 +650,6 @@ High-value customers (top 10%)
 Low-value customers
 Frequent vs infrequent buyers
 */
-
 SELECT os.customer_id, SUM(price) AS totalpurchase
 from order_items_dataset oit
 JOIN olist_orders os
@@ -626,7 +682,6 @@ WHERE decile = 1;
 -- Founded top 10%ile customers by total amount spent
 
 
-
 WITH customer_spend AS(
 SELECT cs.customer_unique_id, SUM(price) AS totalpurchase
 from order_items_dataset oit
@@ -647,6 +702,8 @@ SELECT * FROM ranked
 WHERE decile = 10;
 -- Founded botttom 10%ile customers by total amount spent
 -- -------------------------
+
+
 
 
 
@@ -679,7 +736,9 @@ WHERE EXTRACT(YEAR FROM order_placed_time) = 2018;
 
 
 
--- Customers jinne order kiya but review nahi diya
+
+----- Customers jinne order kiya but review nahi diya
+
 SELECT customer_id FROM olist_orders
 WHERE order_status = 'delivered'
 
@@ -689,11 +748,12 @@ SELECT DISTINCT os.customer_id
 FROM order_reviews orr
 JOIN olist_orders os 
 ON orr.order_id = os.order_id
-
 -- Result:- Total 646 customers haven't given any reviews.
 
 
 
+
+	
 SELECT customer_city,max(order_delivered_customer_date-order_estimated_delivery_date) as longestdelay,
 MAX(order_estimated_delivery_date-order_delivered_customer_date) as earlierthanestimated
 FROM olist_orders oo
@@ -705,6 +765,143 @@ ORDER BY longestdelay
 -- Negative period in longest_delay shows that, there is no delay in delivering an order in that city ('Best cities for us')
 -- Negative value in earlierthanestimated shows that, in that particular city orders have never deliverd on time('Always after estimated date')
 
+
+
+
+
+-----. Pareto Analysis (80/20 Rule) --  Do the top 20% of products contribute around 80% of revenue?
+
+-- You'll need:
+
+-- SUM(price)
+-- Running total
+-- Window functions
+
+with cte1 as
+	(
+		select p.product_id, sum(price) as total_revenue from products p join order_items oe 
+		on p.product_id = oe.product_id group by 1 order by 2 desc
+					)
+			, cte2 as(
+			 select *,ntile(5)over (order by total_revenue desc ) tile
+			 from cte1 
+			)
+			select 100.0*	sum(total_revenue) / (select sum(total_revenue) from cte1	) as contributed
+			from cte2 where tile=1
+
+-- Top 20% products contributes approx 75% of revenue
+
+	WITH revenue AS (
+	    SELECT
+	        product_id, SUM(price) AS total_revenue
+	    FROM order_items
+	    GROUP BY product_id
+	),
+	pareto AS (
+	    SELECT
+	        product_id,  total_revenue,     SUM(total_revenue) OVER (   ORDER BY total_revenue DESC  ) AS running_revenue,
+	        SUM(total_revenue) OVER () AS total_revenue_all
+	    FROM revenue
+	)
+	
+	SELECT
+	    product_id,
+	    total_revenue,
+	        100.0 * running_revenue / total_revenue_all AS cumulative_revenue_percent
+	FROM pareto
+	ORDER BY total_revenue DESC;
+	
+-- Top 8535 products are contributing 80% of revenue
+
+
+
+
+
+----------------- RFM Analysis --------------
+
+SELECT
+	customer_unique_id,max(order_purchase_timestamp)as last_order,
+	(select max(order_purchase_timestamp) from orders) - max(order_purchase_timestamp) as days_since_laet_purchase,
+	count(distinct o.order_id) as total_orders ,
+	sum(price) as total_value
+	FROM customers c
+	join orders o on c.customer_id = o.customer_id 
+	join order_items oe on o.order_id = oe.order_id
+group by 1
+order by 5 desc
+
+
+	
+
+------- Month Moving Average Revenue  --------
+
+with extraction as(		
+	SELECT
+		
+		EXTRACT(year from order_purchase_timestamp	) as yer ,
+		extract(month from order_purchase_timestamp) as mnth,
+		sum(price) as revenues
+		FROM orders o join order_items oe on o.order_id = oe.order_id
+		group by 1,2
+)
+select
+		yer,mnth,
+		avg(revenues)  over(order by yer, mnth rows between 2 preceding and current row) as rnavg
+		from extraction
+		
+
+
+
+-------------===  Delivery Performance by Seller -------==========>>>>>>>>>>>>>
+
+
+	SELECT s.seller_id, count(distinct o.order_id) as total_deliveries,
+	count(distinct o.order_id) filter(where  (order_estimated_delivery_date - order_delivered_customer_date) <interval '00:00:00') as late_deliveries,
+	100.0*count(distinct o.order_id) filter(where  (order_estimated_delivery_date - order_delivered_customer_date) <interval '00:00:00')
+										/	count(distinct o.order_id) as "late%",
+	count(distinct o.order_id) filter(where  (order_estimated_delivery_date - order_delivered_customer_date) >=interval '00:00:00') as ontime_deliveries,
+	100.0*count(distinct o.order_id) filter(where  (order_estimated_delivery_date - order_delivered_customer_date) >=interval '00:00:00')
+								/count(distinct o.order_id) as "ontime_delivery%"
+	FROM sellers s join order_items oe on s.seller_id = oe.seller_id
+	join orders o on oe.order_id = o.order_id 
+	group by 1
+	
+
+----------========>>> Seller Ranking within State
+
+	select seller_state,s.seller_id  , sum(price)as total_rev,
+	dense_rank() over(partition by seller_state order by sum(price) desc) as rnk FROM sellers s
+	join order_items oe on s.seller_id = oe.seller_id
+	join orders o on oe.order_id = o.order_id 
+	group by 1,2
+
+
+-- ---------- Payment Behaviour ---
+
+select payment_type,sum(payment_value) as total_payment,count(p.order_id) as total_transactions,avg(payment_installments) as avg_installment,
+avg(payment_value) as avg_payment_amount
+from payments p join orders o on p.order_id =o.order_id
+where order_status ='delivered'
+group by 1
+
+	
+------=====>>>  Find sellers count by city and tell in which city seller is maximum and where is minimum
+
+SELECT seller_city, COUNT(*) as citysellercount
+FROM sellers
+WHERE seller_city IS NOT NULL
+GROUP BY 1
+order by 2 desc
+
+CREATE EXTENSION IF NOT EXISTS unaccent;
+
+SELECT 
+    unaccent(TRIM(LOWER(seller_city))) AS cleaned_city,
+    COUNT(*) AS citysellercount
+FROM sellers
+WHERE seller_city IS NOT NULL
+GROUP BY unaccent(TRIM(LOWER(seller_city)))
+ORDER BY citysellercount DESC;
 
 
 
