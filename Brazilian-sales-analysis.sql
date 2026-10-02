@@ -1168,6 +1168,6 @@ on o.r
 -----7. Revenue is concentrated among a relatively small group of top-performing sellers.
 	
 -----8. Orders with higher review scores were associated with higher revenue.
------9. Credit cards were the most commonly used payment method and generated the highest revenue (if your payment analysis confirms it).
+-----9. Credit cards were the most commonly used payment method and generated the highest revenue .
 -----10. Monthly revenue generally increased over time, although some months showed temporary declines.
 
