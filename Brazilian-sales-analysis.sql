@@ -896,6 +896,8 @@ group by 1
 
 
 
+
+
 	
 Q.36.--. Pareto Analysis (80/20 Rule) --  Do the top 20% of products contribute around 80% of revenue?
 
@@ -968,12 +970,10 @@ GROUP BY 1
 order by 2 desc
 
 
-
 CREATE EXTENSION IF NOT EXISTS unaccent;
 
-
 SELECT 
-    unaccent(TRIM(LOWER(seller_city))) AS cleaned_city,			
+    unaccent(TRIM(LOWER(seller_city))) AS cleaned_city,
     COUNT(*) AS citysellercount
 FROM sellers
 WHERE seller_city IS NOT NULL
@@ -981,9 +981,19 @@ GROUP BY unaccent(TRIM(LOWER(seller_city)))
 ORDER BY citysellercount DESC;
 
 
+	
 
 
 
+
+
+
+
+
+
+-- Queries that exist in version 2 but not in version 1
+-- Written with version 1 table names (orders, customers, sellers, order_items, payments, reviews)
+-- Numbered Q.38 onward so they can be pasted at the end of version 1
 
 
 
@@ -993,6 +1003,7 @@ ORDER BY citysellercount DESC;
 
 
 -- Q.38. Average order value per seller
+
 SELECT seller_id,
        ROUND(SUM(price)::NUMERIC, 2) AS total_revenue,
        COUNT(DISTINCT order_id) AS total_orders,
@@ -1008,23 +1019,8 @@ ORDER BY 4 DESC;
 
 
 
+-- Q.39 Number of written comments per review score
 
-
-
-
-
--- Q.39. Review score distribution
-SELECT review_score, COUNT(review_id) AS total_reviews
-FROM reviews
-GROUP BY 1
-ORDER BY 2 DESC;
--- Outcome: 5-star reviews are the most common
-
-
-
-
-
--- Q.40. Number of written comments per review score
 SELECT review_score, COUNT(review_comment_message) AS total_comments
 FROM reviews
 WHERE review_comment_message IS NOT NULL
@@ -1035,18 +1031,10 @@ ORDER BY 2 DESC;
 
 
 
--- Q.41. Order count per seller by order_item_id
-SELECT seller_id, order_item_id, COUNT(*) AS count_by_item_id
-FROM order_items
-GROUP BY seller_id, order_item_id
-ORDER BY count_by_item_id DESC;
 
 
 
-
-
-
--- Q.44. Seller city spelling variants (check for "sao paulo" duplicates)
+-- Q.40. Seller city spelling variants (check for "sao paulo" duplicates)
 SELECT seller_city, COUNT(*) AS cnt
 FROM sellers
 WHERE LOWER(seller_city) LIKE '%sao paulo%'
@@ -1058,11 +1046,14 @@ ORDER BY cnt DESC;
 
 
 
--- Q.45. Longest delay and earliest delivery per customer city
+
+-- Q.41. Longest delay and earliest delivery per customer city
 -- Positive longest_delay = delivered late; negative = never late in that city
+
 SELECT c.customer_city,
        MAX(o.order_delivered_customer_date - o.order_estimated_delivery_date) AS longest_delay,
-       MAX(o.order_estimated_delivery_date - o.order_delivered_customer_date) AS earliest_delivery
+       MAX(o.order_estimated_delivery_date - o.order_delivered_customer_date) AS earliest_delivery,
+	   MIN(o.order_delivered_customer_date-o.order_estimated_delivery_date) AS earliest_delivery
 FROM orders o
 JOIN customers c ON o.customer_id = c.customer_id
 WHERE o.order_delivered_customer_date IS NOT NULL
@@ -1073,64 +1064,8 @@ ORDER BY longest_delay;
 
 
 
--- Q.46. Top 10% customers by total spend (uses customer_unique_id)
-WITH customer_spend AS (
-    SELECT c.customer_unique_id, SUM(oi.price) AS total_purchase
-    FROM customers c
-    JOIN orders o ON c.customer_id = o.customer_id
-    JOIN order_items oi ON o.order_id = oi.order_id
-    GROUP BY 1
-),
-ranked AS (
-    SELECT *, NTILE(10) OVER (ORDER BY total_purchase DESC) AS decile
-    FROM customer_spend
-)
-SELECT * FROM ranked WHERE decile = 1;
 
-
-
-
-
--- Q.47. Bottom 10% customers by total spend
-WITH customer_spend AS (
-    SELECT c.customer_unique_id, SUM(oi.price) AS total_purchase
-    FROM customers c
-    JOIN orders o ON c.customer_id = o.customer_id
-    JOIN order_items oi ON o.order_id = oi.order_id
-    GROUP BY 1
-),
-ranked AS (
-    SELECT *, NTILE(10) OVER (ORDER BY total_purchase DESC) AS decile
-    FROM customer_spend
-)
-SELECT * FROM ranked WHERE decile = 10;
-
-
-
-
-
-
--- Q.48. New customers by first purchase year and month
-WITH first_purchase AS (
-    SELECT c.customer_unique_id, MIN(o.order_purchase_timestamp) AS first_order_date
-    FROM orders o
-    JOIN customers c ON o.customer_id = c.customer_id
-    GROUP BY 1
-)
-SELECT EXTRACT(YEAR FROM first_order_date) AS year,
-       EXTRACT(MONTH FROM first_order_date) AS month,
-       COUNT(*) AS new_customers
-FROM first_purchase
-GROUP BY 1, 2
-ORDER BY 1, 2;
-
-
-
-
-
-
-
--- Q.49. Bad review rate per category (score 1 and 2), not just count
+-- Q.42. Bad review rate per category (score 1 and 2), not just count
 SELECT p.product_category_name,
        COUNT(DISTINCT o.order_id) AS total_orders,
        COUNT(DISTINCT o.order_id) FILTER (WHERE r.review_score <= 2) AS bad_review_orders,
@@ -1154,13 +1089,69 @@ ORDER BY bad_review_rate DESC;
 
 
 
+-- Q.42. Top 10% customers by total spend (uses customer_unique_id)
+WITH customer_spend AS (
+    SELECT c.customer_unique_id, SUM(oi.price) AS total_purchase
+    FROM customers c
+    JOIN orders o ON c.customer_id = o.customer_id
+    JOIN order_items oi ON o.order_id = oi.order_id
+    GROUP BY 1
+),
+ranked AS (
+    SELECT *, NTILE(10) OVER (ORDER BY total_purchase DESC) AS decile
+    FROM customer_spend
+)
+SELECT * FROM ranked WHERE decile = 1;
 
 
 
 
--- 	Two to add, since they're listed in your comments but never answered:
--- 45. Frequent vs infrequent buyers (from the segmentation comment)
--- 46. Does late delivery lower review scores?
+
+
+
+-- Q.43. New customers by first purchase year and month
+WITH first_purchase AS (
+    SELECT c.customer_unique_id, MIN(o.order_purchase_timestamp) AS first_order_date
+    FROM orders o
+    JOIN customers c ON o.customer_id = c.customer_id
+    GROUP BY 1
+)
+SELECT EXTRACT(YEAR FROM first_order_date) AS year,
+       EXTRACT(MONTH FROM first_order_date) AS month,
+       COUNT(*) AS new_customers
+FROM first_purchase
+GROUP BY 1, 2
+ORDER BY 1, 2;
+
+
+
+
+-- Q.44. Bad review rate per category (score 1 and 2), not just count
+SELECT p.product_category_name,
+       COUNT(DISTINCT o.order_id) AS total_orders,
+       COUNT(DISTINCT o.order_id) FILTER (WHERE r.review_score <= 2) AS bad_review_orders,
+       ROUND(100.0 * COUNT(DISTINCT o.order_id) FILTER (WHERE r.review_score <= 2)
+             / COUNT(DISTINCT o.order_id), 2) AS bad_review_rate
+FROM reviews r
+JOIN orders o ON r.order_id = o.order_id
+JOIN order_items oi ON o.order_id = oi.order_id
+JOIN products p ON oi.product_id = p.product_id
+GROUP BY 1
+ORDER BY bad_review_rate DESC;
+
+
+
+
+
+
+
+
+
+-- 45. Does late delivery lower review scores?
+
+select * from reviews
+join orders o
+on o.r
 
 
 
@@ -1179,9 +1170,4 @@ ORDER BY bad_review_rate DESC;
 -----8. Orders with higher review scores were associated with higher revenue.
 -----9. Credit cards were the most commonly used payment method and generated the highest revenue (if your payment analysis confirms it).
 -----10. Monthly revenue generally increased over time, although some months showed temporary declines.
-
-
-
-
-
 
